@@ -4,5 +4,6 @@
 #define ALL_IMGUITWEAKS
 
 #include "sugar.hpp"
+#include "animations.hpp"
 
 #endif
