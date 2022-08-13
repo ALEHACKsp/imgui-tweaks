@@ -1,14 +1,196 @@
 #pragma once
 
-#ifndef ANIMATION_IMGUITWEAKER
-#define ANIMATION_IMGUITWEAKER
+#ifndef ALL_IMGUITWEAKS
+#define ALL_IMGUITWEAKS
 
-#include "easings.hpp"
+#include <imgui.h>
+#include <imgui_internal.h>
 
 #include <algorithm>
 #include <unordered_map>
 
-namespace ImAnim 
+#include <functional>
+using callback_t = std::function<void()>;
+
+#ifndef PI_IMGUITWEAKS
+#define PI_IMGUITWEAKS 3.1415926545
+#endif
+
+namespace ImEasings {
+    float InSine(float t) {
+        return sin(1.5707963 * t);
+    }
+
+    float OutSine(float t) {
+        return 1 + sin(1.5707963 * (--t));
+    }
+
+    float InOutSine(float t) {
+        return 0.5 * (1 + sin(3.1415926 * (t - 0.5)));
+    }
+
+    float InQuad(float t) {
+        return t * t;
+    }
+
+    float OutQuad(float t) {
+        return t * (2 - t);
+    }
+
+    float InOutQuad(float t) {
+        return t < 0.5 ? 2 * t * t : t * (4 - 2 * t) - 1;
+    }
+
+    float InCubic(float t) {
+        return t * t * t;
+    }
+
+    float OutCubic(float t) {
+        return 1 + (--t) * t * t;
+    }
+
+    float InOutCubic(float t) {
+        return t < 0.5 ? 4 * t * t * t : 1 + (--t) * (2 * (--t)) * (2 * t);
+    }
+
+    float InQuart(float t) {
+        t *= t;
+        return t * t;
+    }
+
+    float OutQuart(float t) {
+        t = (--t) * t;
+        return 1 - t * t;
+    }
+
+    float InOutQuart(float t) {
+        if (t < 0.5) {
+            t *= t;
+            return 8 * t * t;
+        }
+        else {
+            t = (--t) * t;
+            return 1 - 8 * t * t;
+        }
+    }
+
+    float InQuint(float t) {
+        float t2 = t * t;
+        return t * t2 * t2;
+    }
+
+    float OutQuint(float t) {
+        float t2 = (--t) * t;
+        return 1 + t * t2 * t2;
+    }
+
+    float InOutQuint(float t) {
+        float t2;
+        if (t < 0.5) {
+            t2 = t * t;
+            return 16 * t * t2 * t2;
+        }
+        else {
+            t2 = (--t) * t;
+            return 1 + 16 * t * t2 * t2;
+        }
+    }
+
+    float InExpo(float t) {
+        return (pow(2, 8 * t) - 1) / 255;
+    }
+
+    float OutExpo(float t) {
+        return 1 - pow(2, -8 * t);
+    }
+
+    float InOutExpo(float t) {
+        if (t < 0.5) {
+            return (pow(2, 16 * t) - 1) / 510;
+        }
+        else {
+            return 1 - 0.5 * pow(2, -16 * (t - 0.5));
+        }
+    }
+
+    float InCirc(float t) {
+        return 1 - sqrt(1 - t);
+    }
+
+    float OutCirc(float t) {
+        return sqrt(t);
+    }
+
+    float InOutCirc(float t) {
+        if (t < 0.5) {
+            return (1 - sqrt(1 - 2 * t)) * 0.5;
+        }
+        else {
+            return (1 + sqrt(2 * t - 1)) * 0.5;
+        }
+    }
+
+    float InBack(float t) {
+        return t * t * (2.70158 * t - 1.70158);
+    }
+
+    float OutBack(float t) {
+        return 1 + (--t) * t * (2.70158 * t + 1.70158);
+    }
+
+    float InOutBack(float t) {
+        if (t < 0.5) {
+            return t * t * (7 * t - 2.5) * 2;
+        }
+        else {
+            return 1 + (--t) * t * 2 * (7 * t + 2.5);
+        }
+    }
+
+    float InElastic(float t) {
+        float t2 = t * t;
+        return t2 * t2 * sin(t * PI_IMGUITWEAKS * 4.5);
+    }
+
+    float OutElastic(float t) {
+        float t2 = (t - 1) * (t - 1);
+        return 1 - t2 * t2 * cos(t * PI_IMGUITWEAKS * 4.5);
+    }
+
+    float InOutElastic(float t) {
+        float t2;
+        if (t < 0.45) {
+            t2 = t * t;
+            return 8 * t2 * t2 * sin(t * PI_IMGUITWEAKS * 9);
+        }
+        else if (t < 0.55) {
+            return 0.5 + 0.75 * sin(t * PI_IMGUITWEAKS * 4);
+        }
+        else {
+            t2 = (t - 1) * (t - 1);
+            return 1 - 8 * t2 * t2 * sin(t * PI_IMGUITWEAKS * 9);
+        }
+    }
+
+    float InBounce(float t) {
+        return pow(2, 6 * (t - 1)) * abs(sin(t * PI_IMGUITWEAKS * 3.5));
+    }
+
+    float OutBounce(float t) {
+        return 1 - pow(2, -6 * t) * abs(cos(t * PI_IMGUITWEAKS * 3.5));
+    }
+
+    float InOutBounce(float t) {
+        if (t < 0.5) {
+            return 8 * pow(2, 8 * (t - 1)) * abs(sin(t * PI_IMGUITWEAKS * 7));
+        }
+        else {
+            return 1 - 8 * pow(2, -8 * t) * abs(sin(t * PI_IMGUITWEAKS * 7));
+        }
+    }
+}
+
+namespace ImAnimations 
 {
 	/*
 	* Easing functions are only available when the value type is float. 
@@ -124,6 +306,59 @@ namespace ImAnim
 	private:
 		std::unordered_map<T, B> storage;
 	};
+
+	__forceinline ImColor LerpColor(ImColor start, ImColor end, float interpolation) {
+		return ImLerp(
+			ImVec4(start.Value.x, start.Value.y, start.Value.z, start.Value.w), 
+			ImVec4(end.Value.x, end.Value.y, end.Value.z, end.Value.w),
+			interpolation
+		);
+	}
+}
+
+namespace ImSugar
+{
+	__forceinline bool Button(const char* label, ImVec2 size, callback_t callback = nullptr)
+	{
+		if (ImGui::Button(label, size))
+			callback();
+	}
+
+	__forceinline void Font(ImFont* font, callback_t callback = nullptr)
+	{
+		ImGui::PushFont(font);
+		{
+			callback();
+		}
+		ImGui::PopFont();
+	}
+
+	__forceinline void Group(callback_t callback = nullptr)
+	{
+		ImGui::BeginGroup();
+		{
+			callback();
+		}
+		ImGui::EndGroup();
+	}
+
+	__forceinline void Child(const char* label, ImVec2 size, callback_t callback, bool border = false, ImGuiWindowFlags flags = 0)
+	{
+		ImGui::BeginChild(label, size, border, flags);
+		{
+			callback();
+		}
+		ImGui::EndChild();
+	}
+
+	__forceinline void Window(const char* name, bool* p_open = NULL, ImGuiWindowFlags flags = 0, callback_t callback = nullptr)
+	{
+		ImGui::Begin(name, p_open, flags);
+		{
+			callback();
+		}
+		ImGui::End();
+	}
 }
 
 #endif
